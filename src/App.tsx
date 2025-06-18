@@ -25,7 +25,7 @@ function App() {
     {
       title: 'Apple iPhone 15 Pro Max 256GB',
       origin: 'Китай',
-      price: 14999900,
+      price: 34900, // 349 рублей как в ТЗ
       currency: 'RUB' as Currency,
       imageUrl: './images/iphone/front.webp',
       colors: [
@@ -44,9 +44,9 @@ function App() {
     },
     {
       title: 'MacBook Pro 14" M3 Pro',
-      origin: 'Китай',
-      price: 24999900,
-      currency: 'RUB' as Currency,
+      origin: 'USA',
+      price: 34900, // $349 как в ТЗ
+      currency: 'USD' as Currency,
       imageUrl: './images/macbook/front.webp',
       colors: [
         {
@@ -64,9 +64,9 @@ function App() {
     },
     {
       title: 'Apple Watch Ultra 2',
-      origin: 'Китай',
-      price: 8999900,
-      currency: 'RUB' as Currency,
+      origin: 'Germany',
+      price: 34900, // 349€ как в ТЗ
+      currency: 'EUR' as Currency,
       imageUrl: './images/watch/blue.webp',
       colors: [
         {
@@ -109,12 +109,9 @@ function App() {
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl xs:text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Наши продукты
+              Тестовые продукты
             </h1>
-            <p className="text-gray-600 max-w-2xl mx-auto px-4">
-              Откройте для себя нашу коллекцию премиальной техники Apple. 
-              Каждый продукт создан с вниманием к деталям и инновациям.
-            </p>
+
           </div>
           
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6 xs:gap-8">

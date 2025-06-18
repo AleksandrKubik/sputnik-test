@@ -1,5 +1,5 @@
 import { type FC, useEffect, useCallback, useState } from 'react';
-import type { ProductCardProps, ColorVariant } from '../types/product';
+import type { ProductCardProps, ColorVariant, Currency } from '../types/product';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs, FreeMode } from 'swiper/modules';
 import 'swiper/css';
@@ -13,6 +13,24 @@ interface ProductModalProps extends ProductCardProps {
     onClose: () => void;
     selectedColor?: string;
 }
+
+/**
+ * Локали для корректного форматирования валют
+ */
+const CURRENCY_LOCALES: Record<Currency, string> = {
+    'RUB': 'ru-RU',
+    'USD': 'en-US',
+    'EUR': 'de-DE',
+};
+
+/**
+ * Курсы валют относительно рубля
+ */
+const EXCHANGE_RATES: Record<Currency, number> = {
+    'RUB': 1,
+    'USD': 0.0108,  // 1 RUB = 0.0108 USD (или 1 USD = 92.59 RUB)
+    'EUR': 0.0100,  // 1 RUB = 0.0100 EUR (или 1 EUR = 100 RUB)
+};
 
 const ProductModal: FC<ProductModalProps> = ({
     isOpen,
@@ -51,12 +69,20 @@ const ProductModal: FC<ProductModalProps> = ({
         };
     }, [isOpen, onClose]);
 
-    const formatPrice = useCallback((price: number, currency: string): string => {
-        return new Intl.NumberFormat('ru-RU', {
+    const formatPrice = useCallback((price: number, fromCurrency: Currency, toCurrency: Currency): string => {
+        const locale = CURRENCY_LOCALES[toCurrency];
+        
+        // Конвертируем цену из исходной валюты в целевую
+        const priceInRub = price / 100; // Переводим копейки в рубли
+        const exchangeRate = EXCHANGE_RATES[toCurrency] / EXCHANGE_RATES[fromCurrency];
+        const convertedPrice = Math.round(priceInRub * exchangeRate); // Округляем до целых
+        
+        return new Intl.NumberFormat(locale, {
             style: 'currency',
-            currency,
+            currency: toCurrency,
             minimumFractionDigits: 0,
-        }).format(price / 100);
+            maximumFractionDigits: 0,
+        }).format(convertedPrice);
     }, []);
 
     const handleColorChange = useCallback((colorName: string): void => {
@@ -64,7 +90,12 @@ const ProductModal: FC<ProductModalProps> = ({
         onColorChange?.(colorName);
     }, [onColorChange]);
 
-    const formattedPrice = formatPrice(price, currency);
+    // Форматируем цену во всех валютах
+    const formattedPrices = {
+        RUB: formatPrice(price, currency, 'RUB'),
+        USD: formatPrice(price, currency, 'USD'),
+        EUR: formatPrice(price, currency, 'EUR')
+    };
 
     if (!isOpen) return null;
 
@@ -210,24 +241,28 @@ const ProductModal: FC<ProductModalProps> = ({
                         )}
 
                         <div className="mt-auto">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-3xl font-bold text-gray-900">
-                                    {formattedPrice}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                    Доступно к заказу
-                                </span>
+                            <div className="flex flex-col gap-2 mb-4">
+                                <p className="text-3xl font-bold text-gray-900">
+                                    {formattedPrices.RUB}
+                                </p>
+                                <div className="flex gap-2 text-lg text-gray-600">
+                                    <span>{formattedPrices.USD}</span>
+                                    <span className="text-gray-300">•</span>
+                                    <span>{formattedPrices.EUR}</span>
+                                </div>
                             </div>
 
-                            <button
+                            <button 
                                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white 
                                          px-6 py-3 rounded-full text-lg font-medium transition-all duration-300 
                                          hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] 
-                                         focus:outline-none focus:ring-2 focus:ring-purple-600 
-                                         focus:ring-offset-2"
-                                type="button"
+                                         focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: Добавить логику добавления в корзину
+                                }}
                             >
-                                Добавить в корзину
+                                В корзину
                             </button>
                         </div>
                     </div>
